@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Меню</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .menu-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        max-width: 800px;
+        width: 100%;
+      }
+      .card {
+        background: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        position: relative;
+      }
+      .card h3 {
+        margin: 0 0 10px;
+      }
+      .card p {
+        margin: 5px 0;
+      }
+      .price {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .btn-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .btn {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .edit-btn {
+        background: #ffc107;
+        color: black;
+      }
+      .delete-btn {
+        background: #dc3545;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Меню</h1>
+    <div class="menu-container" id="menuContainer"></div>
+
+    <script>
+      const menuItems = [
+        {
+          title: "Піца Маргарита",
+          description:
+            "Традиційна італійська піца з томатним соусом та моцарелою.",
+          price: "200 грн",
+        },
+        {
+          title: "Борщ український",
+          description:
+            "Класичний український борщ з буряком, м'ясом та сметаною.",
+          price: "150 грн",
+        },
+        {
+          title: "Суші Філадельфія",
+          description: "Роли з лососем, сиром Філадельфія та огірком.",
+          price: "250 грн",
+        },
+        {
+          title: "Цезар-салат",
+          description: "Куряче філе, пармезан, сухарики та соус Цезар.",
+          price: "180 грн",
+        },
+      ];
+
+      function renderMenu() {
+        const container = document.getElementById("menuContainer");
+        container.innerHTML = "";
+        menuItems.forEach((item, index) => {
+          const card = document.createElement("div");
+          card.classList.add("card");
+          card.innerHTML = `
+                    <h3>${item.title}</h3>
+                    <p>${item.description}</p>
+                    <p class="price">${item.price}</p>
+                    <div class="btn-container">
+                        <button class="btn edit-btn" onclick="editItem(${index})">Редагувати</button>
+                        <button class="btn delete-btn" onclick="deleteItem(${index})">Видалити</button>
+                    </div>
+                `;
+          container.appendChild(card);
+        });
+      }
+
+      function editItem(index) {
+        const newTitle = prompt("Введіть нову назву:", menuItems[index].title);
+        const newDescription = prompt(
+          "Введіть новий опис:",
+          menuItems[index].description
+        );
+        const newPrice = prompt("Введіть нову ціну:", menuItems[index].price);
+        if (newTitle && newDescription && newPrice) {
+          menuItems[index] = {
+            title: newTitle,
+            description: newDescription,
+            price: newPrice,
+          };
+          renderMenu();
+        }
+      }
+
+      function deleteItem(index) {
+        if (confirm("Ви впевнені, що хочете видалити це блюдо?")) {
+          menuItems.splice(index, 1);
+          renderMenu();
+        }
+      }
+
+      renderMenu();
+    </script>
+  </body>
+</html>

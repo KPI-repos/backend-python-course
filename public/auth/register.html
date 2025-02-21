@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Form</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+      }
+      .register-container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+      .register-container h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .register-container input {
+        width: 280px;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .register-container button {
+        width: 100%;
+        padding: 10px;
+        background: #28a745;
+        border: none;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .register-container button:hover {
+        background: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="register-container">
+      <h2>Реєстрація</h2>
+      <form id="registerForm">
+        <input type="text" id="newUsername" placeholder="Логін" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="newPassword" placeholder="Пароль" required />
+        <button type="submit">Зареєструватися</button>
+      </form>
+      <p id="registerMessage" style="text-align: center; color: red"></p>
+      <a
+        style="
+          text-align: center;
+          display: inline-block;
+          width: 100%;
+          margin: 0 auto;
+        "
+        href="/login"
+        >Вже є акаунт?</a
+      >
+    </div>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const username = document.getElementById("newUsername").value;
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("newPassword").value;
+
+          fetch("https://example.com/api/register", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ username, email, password }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Реєстрація успішна! Тепер увійдіть у свій акаунт.");
+                window.location.href = "login.html";
+              } else {
+                document.getElementById("registerMessage").textContent =
+                  "Помилка реєстрації. Спробуйте ще раз.";
+              }
+            })
+            .catch((error) => {
+              console.error("Помилка: ", error);
+            });
+        });
+    </script>
+  </body>
+</html>
