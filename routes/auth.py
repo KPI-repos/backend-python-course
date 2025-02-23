@@ -2,6 +2,8 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse, FileResponse
 import sqlite3
 import hashlib
+from models.auth import UserResponse, BasicResponse
+
 
 router = APIRouter()
 
@@ -39,7 +41,10 @@ def init_db():
 # Initialize database
 init_db()
 
-@router.post("/api/login")
+@router.post("/api/login",
+    response_model=UserResponse,
+    summary="User Login",
+    description="Authenticate a user and return their profile information",)
 async def login(user: dict):
     try:
         conn = get_db()
@@ -75,7 +80,10 @@ async def login(user: dict):
         if conn:
             conn.close()
 
-@router.post("/api/register")
+@router.post("/api/register",
+    response_model=BasicResponse,
+    summary="User Registration",
+    description="Register a new user account",)
 async def register(user: dict):
     try:
         conn = get_db()
