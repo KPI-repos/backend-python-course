@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="uk">
   <head>
-    <!-- Previous head content remains the same -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Меню</title>
@@ -259,7 +258,6 @@
     </div>
     <div class="menu-container" id="menuContainer"></div>
 
-    <!-- Create Modal -->
     <div class="modal-overlay" id="createModal">
       <div class="modal">
         <div class="modal-header">
@@ -301,7 +299,6 @@
       </div>
     </div>
 
-    <!-- Edit Modal -->
     <div class="modal-overlay" id="editModal">
       <div class="modal">
         <div class="modal-header">
@@ -333,7 +330,6 @@
     </div>
 
     <script>
-      // Load menu items from backend
       async function loadMenuItems() {
         try {
           const response = await fetch("/api/dishes");
@@ -353,7 +349,6 @@
         const isAdmin = userRole === "admin";
         const isCustomer = userRole === "customer";
 
-        // Show/hide admin controls
         adminControls.style.display = isAdmin ? "block" : "none";
 
         const menuItems = await loadMenuItems();
@@ -394,7 +389,6 @@
         const modal = document.getElementById("editModal");
         modal.style.display = "flex";
 
-        // Fetch dish details and populate form
         fetch(`/api/dishes/${dishId}`)
           .then((response) => response.json())
           .then((data) => {
@@ -482,7 +476,6 @@
         }
       }
 
-      // Initialize page
       renderMenu();
 
       function openCreateModal() {
@@ -571,7 +564,6 @@
         }
       }
 
-      // Close modals when clicking outside
       window.onclick = function (event) {
         const editModal = document.getElementById("editModal");
         const createModal = document.getElementById("createModal");

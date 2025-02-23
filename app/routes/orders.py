@@ -15,7 +15,6 @@ class OrderCreate(BaseModel):
 @router.post("/api/orders")
 async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
     try:
-        # Verify user exists and is a customer
         user = db.query(User).filter(
             User.id == order.userId,
             User.role == 'customer'
@@ -23,12 +22,10 @@ async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found or not authorized")
 
-        # Verify dish exists
         dish = db.query(Dish).filter(Dish.id == order.dishId).first()
         if not dish:
             raise HTTPException(status_code=404, detail="Dish not found")
 
-        # Create order
         db_order = Order(
             user_id=order.userId,
             dish_id=order.dishId,

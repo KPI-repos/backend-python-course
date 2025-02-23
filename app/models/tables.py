@@ -13,7 +13,6 @@ class User(Base):
     password = Column(String, nullable=False)
     role = Column(String, nullable=False)
     
-    # Relationship
     orders = relationship("Order", back_populates="user")
     
     __table_args__ = (
@@ -28,7 +27,6 @@ class Dish(Base):
     description = Column(String)
     price = Column(Float, nullable=False)
     
-    # Relationship
     orders = relationship("Order", back_populates="dish")
 
 class Order(Base):
@@ -40,6 +38,5 @@ class Order(Base):
     status = Column(String, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Relationships
     user = relationship("User", back_populates="orders")
     dish = relationship("Dish", back_populates="orders")

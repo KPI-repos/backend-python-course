@@ -51,7 +51,6 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
 @router.post("/api/register", response_model=UserResponse)
 async def register(user: UserRegister, db: Session = Depends(get_db)):
     try:
-        # Check existing user
         existing_user = db.query(User).filter(
             (User.login == user.username) | (User.email == user.email)
         ).first()
@@ -65,7 +64,6 @@ async def register(user: UserRegister, db: Session = Depends(get_db)):
         
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
         
-        # Create new user
         db_user = User(
             login=user.username,
             email=user.email,

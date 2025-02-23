@@ -6,10 +6,8 @@ def init_test_data():
     """Initialize test users and sample dishes in the database"""
     db = SessionLocal()
     try:
-        # Check if admin user exists
         admin = db.query(User).filter(User.login == 'admin').first()
         if not admin:
-            # Create admin user
             admin_password = hashlib.sha256('admin'.encode()).hexdigest()
             admin = User(
                 login='admin',
@@ -19,10 +17,8 @@ def init_test_data():
             )
             db.add(admin)
 
-        # Check if test customer exists
         customer = db.query(User).filter(User.login == 'customer').first()
         if not customer:
-            # Create test customer
             customer_password = hashlib.sha256('customer'.encode()).hexdigest()
             customer = User(
                 login='customer',
@@ -32,7 +28,6 @@ def init_test_data():
             )
             db.add(customer)
 
-        # Add sample dishes
         sample_dishes = [
             {
                 "title": "Піца Маргарита",

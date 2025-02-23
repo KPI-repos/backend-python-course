@@ -165,7 +165,6 @@
             body: JSON.stringify({ username, email, password }),
           });
 
-          // Check if response is ok (status in 200-299 range)
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({
               message: "Помилка сервера",

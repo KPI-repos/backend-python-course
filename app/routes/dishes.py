@@ -65,12 +65,10 @@ async def get_dishes(db: Session = Depends(get_db)):
 @router.delete("/api/dishes/{dish_id}")
 async def delete_dish(dish_id: int, db: Session = Depends(get_db)):
     try:
-        # Check if dish exists
         dish = db.query(Dish).filter(Dish.id == dish_id).first()
         if not dish:
             raise HTTPException(status_code=404, detail="Dish not found")
             
-        # Check for existing orders
         order_count = db.query(Order).filter(Order.dish_id == dish_id).count()
         if order_count > 0:
             return {
