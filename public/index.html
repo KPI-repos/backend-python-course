@@ -4,38 +4,86 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Головна сторінка</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
       body {
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #f4f4f4;
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-      .container {
-        background: white;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        width: 400px;
+        color: #2d3748;
       }
+
+      .container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        transition: transform 0.3s ease;
+      }
+
+      .container:hover {
+        transform: translateY(-5px);
+      }
+
       h1 {
-        margin-bottom: 20px;
+        color: #2d3748;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
       }
-      a {
+
+      p {
+        color: #4a5568;
+        font-size: 1.1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+      }
+
+      .menu-button {
         display: inline-block;
-        padding: 10px 20px;
-        margin-top: 20px;
-        background: #007bff;
+        padding: 0.75rem 1.5rem;
+        background: #667eea;
         color: white;
         text-decoration: none;
-        border-radius: 5px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
       }
-      a:hover {
-        background: #0056b3;
+
+      .menu-button:hover {
+        background: #5a67d8;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 1.5rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        p {
+          font-size: 1rem;
+        }
       }
     </style>
   </head>
@@ -43,7 +91,10 @@
     <div class="container">
       <h1>Ласкаво просимо!</h1>
       <p>Чи хочете ви замовити їжу?</p>
-      <a href="/menu">Переглянути меню</a>
+      <div style="display: flex; gap: 10px">
+        <a href="/menu" class="menu-button">Переглянути меню</a>
+        <a href="/login" class="menu-button">Війти в акаунт</a>
+      </div>
     </div>
   </body>
 </html>

@@ -1,139 +1,586 @@
 <!DOCTYPE html>
 <html lang="uk">
   <head>
+    <!-- Previous head content remains the same -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Меню</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
       body {
+        min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #f4f4f4;
-        font-family: Arial, sans-serif;
-        padding: 20px;
+        padding: 2rem;
+        color: #2d3748;
       }
+
+      h1 {
+        color: black;
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
       .menu-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        max-width: 800px;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        max-width: 1200px;
         width: 100%;
+        padding: 1rem;
       }
+
       .card {
-        background: white;
-        padding: 15px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.95);
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         text-align: center;
         position: relative;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      }
+
       .card h3 {
-        margin: 0 0 10px;
+        color: #2d3748;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
       }
+
       .card p {
-        margin: 5px 0;
+        color: #4a5568;
+        margin: 0.75rem 0;
+        line-height: 1.5;
       }
+
       .price {
-        font-weight: bold;
-        color: #007bff;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #667eea;
+        margin: 1rem 0;
       }
+
       .btn-container {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin-top: 10px;
+        gap: 0.75rem;
+        margin-top: 1.25rem;
       }
+
       .btn {
-        padding: 5px 10px;
+        padding: 0.75rem 1.25rem;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
+        font-weight: 500;
         cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
       }
+
       .edit-btn {
-        background: #ffc107;
-        color: black;
+        background: #ffd60a;
+        color: #000000;
       }
+
+      .edit-btn:hover {
+        background: #e6c10a;
+        transform: translateY(-2px);
+      }
+
       .delete-btn {
-        background: #dc3545;
+        background: #ef4444;
         color: white;
+      }
+
+      .delete-btn:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 640px) {
+        .menu-container {
+          grid-template-columns: 1fr;
+          padding: 0.5rem;
+        }
+
+        .card {
+          padding: 1.25rem;
+        }
+
+        h1 {
+          font-size: 2rem;
+          margin-bottom: 1.5rem;
+        }
+      }
+      .order-btn {
+        background: #10b981;
+        color: white;
+      }
+
+      .order-btn:hover {
+        background: #059669;
+        transform: translateY(-2px);
+      }
+
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
+
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2d3748;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #4a5568;
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #4a5568;
+        font-weight: 500;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      .save-btn {
+        background: #10b981;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .save-btn:hover {
+        background: #059669;
+      }
+
+      .cancel-btn {
+        background: #e5e7eb;
+        color: #4b5563;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .cancel-btn:hover {
+        background: #d1d5db;
       }
     </style>
   </head>
   <body>
     <h1>Меню</h1>
+    <div
+      class="admin-controls"
+      id="adminControls"
+      style="margin-bottom: 2rem; display: none"
+    >
+      <button class="btn create-btn" onclick="openCreateModal()">
+        Додати нову страву
+      </button>
+    </div>
     <div class="menu-container" id="menuContainer"></div>
 
-    <script>
-      const menuItems = [
-        {
-          title: "Піца Маргарита",
-          description:
-            "Традиційна італійська піца з томатним соусом та моцарелою.",
-          price: "200 грн",
-        },
-        {
-          title: "Борщ український",
-          description:
-            "Класичний український борщ з буряком, м'ясом та сметаною.",
-          price: "150 грн",
-        },
-        {
-          title: "Суші Філадельфія",
-          description: "Роли з лососем, сиром Філадельфія та огірком.",
-          price: "250 грн",
-        },
-        {
-          title: "Цезар-салат",
-          description: "Куряче філе, пармезан, сухарики та соус Цезар.",
-          price: "180 грн",
-        },
-      ];
+    <!-- Create Modal -->
+    <div class="modal-overlay" id="createModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Додати нову страву</h2>
+          <button class="close-btn" onclick="closeCreateModal()">
+            &times;
+          </button>
+        </div>
+        <form id="createForm" onsubmit="handleCreateSubmit(event)">
+          <div class="form-group">
+            <label for="createTitle">Назва:</label>
+            <input type="text" id="createTitle" required />
+          </div>
+          <div class="form-group">
+            <label for="createDescription">Опис:</label>
+            <textarea id="createDescription" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="createPrice">Ціна (грн):</label>
+            <input
+              type="number"
+              id="createPrice"
+              step="0.01"
+              min="0"
+              required
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="cancel-btn"
+              onclick="closeCreateModal()"
+            >
+              Скасувати
+            </button>
+            <button type="submit" class="save-btn">Створити</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-      function renderMenu() {
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Редагувати страву</h2>
+          <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <form id="editForm" onsubmit="handleEditSubmit(event)">
+          <input type="hidden" id="editDishId" />
+          <div class="form-group">
+            <label for="editTitle">Назва:</label>
+            <input type="text" id="editTitle" required />
+          </div>
+          <div class="form-group">
+            <label for="editDescription">Опис:</label>
+            <textarea id="editDescription" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="editPrice">Ціна (грн):</label>
+            <input type="number" id="editPrice" step="0.01" min="0" required />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="cancel-btn" onclick="closeEditModal()">
+              Скасувати
+            </button>
+            <button type="submit" class="save-btn">Зберегти</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Load menu items from backend
+      async function loadMenuItems() {
+        try {
+          const response = await fetch("/api/dishes");
+          const data = await response.json();
+          return data.dishes || [];
+        } catch (error) {
+          console.error("Error loading menu items:", error);
+          return [];
+        }
+      }
+
+      async function renderMenu() {
         const container = document.getElementById("menuContainer");
+        const adminControls = document.getElementById("adminControls");
+        const userRole = localStorage.getItem("userRole");
+        const userId = localStorage.getItem("userId");
+        const isAdmin = userRole === "admin";
+        const isCustomer = userRole === "customer";
+
+        // Show/hide admin controls
+        adminControls.style.display = isAdmin ? "block" : "none";
+
+        const menuItems = await loadMenuItems();
+
         container.innerHTML = "";
-        menuItems.forEach((item, index) => {
+        menuItems.forEach((item) => {
           const card = document.createElement("div");
           card.classList.add("card");
+
+          let buttonsHtml = "";
+
+          if (isAdmin) {
+            buttonsHtml = `
+                      <div class="btn-container">
+                          <button class="btn edit-btn" onclick="openEditModal(${item.id})">Редагувати</button>
+                          <button class="btn delete-btn" onclick="deleteItem(${item.id})">Видалити</button>
+                      </div>
+                  `;
+          } else if (isCustomer) {
+            buttonsHtml = `
+                      <div class="btn-container">
+                          <button class="btn order-btn" onclick="orderItem(${item.id})">Замовити</button>
+                      </div>
+                  `;
+          }
+
           card.innerHTML = `
-                    <h3>${item.title}</h3>
-                    <p>${item.description}</p>
-                    <p class="price">${item.price}</p>
-                    <div class="btn-container">
-                        <button class="btn edit-btn" onclick="editItem(${index})">Редагувати</button>
-                        <button class="btn delete-btn" onclick="deleteItem(${index})">Видалити</button>
-                    </div>
-                `;
+                  <h3>${item.title}</h3>
+                  <p>${item.description}</p>
+                  <p class="price">${item.price} грн</p>
+                  ${buttonsHtml}
+              `;
           container.appendChild(card);
         });
       }
 
-      function editItem(index) {
-        const newTitle = prompt("Введіть нову назву:", menuItems[index].title);
-        const newDescription = prompt(
-          "Введіть новий опис:",
-          menuItems[index].description
-        );
-        const newPrice = prompt("Введіть нову ціну:", menuItems[index].price);
-        if (newTitle && newDescription && newPrice) {
-          menuItems[index] = {
-            title: newTitle,
-            description: newDescription,
-            price: newPrice,
-          };
-          renderMenu();
+      function openEditModal(dishId) {
+        const modal = document.getElementById("editModal");
+        modal.style.display = "flex";
+
+        // Fetch dish details and populate form
+        fetch(`/api/dishes/${dishId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            document.getElementById("editDishId").value = dishId;
+            document.getElementById("editTitle").value = data.title;
+            document.getElementById("editDescription").value = data.description;
+            document.getElementById("editPrice").value = data.price;
+          })
+          .catch((error) => {
+            console.error("Error fetching dish details:", error);
+            closeEditModal();
+            alert("Помилка при завантаженні даних страви");
+          });
+      }
+
+      function closeEditModal() {
+        const modal = document.getElementById("editModal");
+        modal.style.display = "none";
+        document.getElementById("editForm").reset();
+      }
+
+      async function deleteItem(dishId) {
+        if (!confirm("Ви впевнені, що хочете видалити цю страву?")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/dishes/${dishId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            renderMenu();
+            alert("Страву успішно видалено!");
+          } else {
+            alert(data.message || "Помилка при видаленні страви");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Помилка при видаленні страви. Перевірте консоль для деталей.");
         }
       }
 
-      function deleteItem(index) {
-        if (confirm("Ви впевнені, що хочете видалити це блюдо?")) {
-          menuItems.splice(index, 1);
-          renderMenu();
+      async function handleEditSubmit(event) {
+        event.preventDefault();
+
+        const dishId = document.getElementById("editDishId").value;
+        const title = document.getElementById("editTitle").value;
+        const description = document.getElementById("editDescription").value;
+        const price = parseFloat(document.getElementById("editPrice").value);
+
+        try {
+          const response = await fetch(`/api/dishes/${dishId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title,
+              description,
+              price,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+          if (data.success) {
+            closeEditModal();
+            renderMenu();
+            alert("Страву успішно оновлено!");
+          } else {
+            alert(data.message || "Помилка при оновленні страви");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Помилка при оновленні страви");
         }
       }
 
+      // Initialize page
       renderMenu();
+
+      function openCreateModal() {
+        const modal = document.getElementById("createModal");
+        modal.style.display = "flex";
+      }
+
+      function closeCreateModal() {
+        const modal = document.getElementById("createModal");
+        modal.style.display = "none";
+        document.getElementById("createForm").reset();
+      }
+
+      async function handleCreateSubmit(event) {
+        event.preventDefault();
+
+        const title = document.getElementById("createTitle").value;
+        const description = document.getElementById("createDescription").value;
+        const price = parseFloat(document.getElementById("createPrice").value);
+
+        try {
+          const response = await fetch("/api/dishes", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              title,
+              description,
+              price,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const data = await response.json();
+          if (data.success) {
+            closeCreateModal();
+            renderMenu();
+            alert("Страву успішно створено!");
+          } else {
+            alert(data.message || "Помилка при створенні страви");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Помилка при створенні страви");
+        }
+      }
+
+      async function orderItem(dishId) {
+        const userRole = localStorage.getItem("userRole");
+        const userId = localStorage.getItem("userId");
+
+        if (userRole !== "customer" || !userId) {
+          alert("Будь ласка, увійдіть як клієнт для замовлення");
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: parseInt(userId),
+              dishId: dishId,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Помилка при створенні замовлення");
+          }
+
+          const data = await response.json();
+          if (data.success) {
+            alert("Замовлення успішно створено!");
+          } else {
+            alert(data.message || "Помилка при створенні замовлення");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          alert("Помилка при створенні замовлення");
+        }
+      }
+
+      // Close modals when clicking outside
+      window.onclick = function (event) {
+        const editModal = document.getElementById("editModal");
+        const createModal = document.getElementById("createModal");
+        if (event.target === editModal) {
+          closeEditModal();
+        } else if (event.target === createModal) {
+          closeCreateModal();
+        }
+      };
     </script>
   </body>
 </html>

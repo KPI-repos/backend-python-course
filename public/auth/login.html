@@ -156,7 +156,6 @@
             body: JSON.stringify({ username, password }),
           });
 
-          // Check if response is ok (status in 200-299 range)
           if (!response.ok) {
             const errorData = await response.json().catch(() => ({
               message: "Помилка сервера",
@@ -167,6 +166,13 @@
           const data = await response.json();
 
           if (data.success) {
+            console.log(data);
+
+            if (data.user.role) {
+              localStorage.setItem("userRole", data.user.role);
+              localStorage.setItem("userId", data.user.id);
+            }
+
             showMessage("Успішний вхід!", false);
             setTimeout(() => {
               window.location.href = "/menu";
