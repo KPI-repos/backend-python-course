@@ -3,99 +3,182 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login Form</title>
+    <title>Вхід</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", sans-serif;
+      }
+
       body {
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
-        background-color: #f4f4f4;
-        font-family: Arial, sans-serif;
-      }
-      .login-container {
-        background: white;
         padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        width: 300px;
       }
-      .login-container h2 {
-        text-align: center;
-        margin-bottom: 20px;
-      }
-      .login-container input {
-        width: 280px;
-        padding: 10px;
-        margin: 10px 0;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
-      .login-container button {
+
+      .auth-container {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         width: 100%;
-        padding: 10px;
-        background: #007bff;
-        border: none;
-        color: white;
-        border-radius: 5px;
-        cursor: pointer;
+        max-width: 400px;
       }
-      .login-container button:hover {
-        background: #0056b3;
+
+      .auth-container h2 {
+        color: #2d3748;
+        text-align: center;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+      }
+
+      .input-group {
+        margin-bottom: 1.2rem;
+      }
+
+      .input-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        outline: none;
+      }
+
+      .input-group input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+
+      .auth-button {
+        width: 100%;
+        padding: 0.75rem;
+        background: #667eea;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+      }
+
+      .auth-button:hover {
+        background: #5a67d8;
+      }
+
+      .message {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+      }
+
+      .message.error {
+        display: block;
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+      }
+
+      .message.success {
+        display: block;
+        background-color: #dcfce7;
+        color: #16a34a;
+        border: 1px solid #bbf7d0;
+      }
+
+      .auth-links {
+        margin-top: 1.5rem;
+        text-align: center;
+      }
+
+      .auth-links a {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: color 0.3s ease;
+      }
+
+      .auth-links a:hover {
+        color: #5a67d8;
+        text-decoration: underline;
       }
     </style>
   </head>
   <body>
-    <div class="login-container">
+    <div class="auth-container">
       <h2>Вхід</h2>
       <form id="loginForm">
-        <input type="text" id="username" placeholder="Логін" required />
-        <input type="password" id="password" placeholder="Пароль" required />
-        <button type="submit">Увійти</button>
+        <div class="input-group">
+          <input type="text" id="username" placeholder="Логін" required />
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Пароль" required />
+        </div>
+        <button type="submit" class="auth-button">Увійти</button>
       </form>
-      <p id="message" style="text-align: center; color: red"></p>
-      <a
-        style="
-          text-align: center;
-          display: inline-block;
-          width: 100%;
-          margin: 0 auto;
-        "
-        href="/register"
-        >Створити новий акаунт</a
-      >
+      <p id="message" class="message"></p>
+      <div class="auth-links">
+        <a href="/register">Створити новий акаунт</a>
+      </div>
     </div>
 
     <script>
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
+      const loginForm = document.getElementById("loginForm");
+      const messageEl = document.getElementById("message");
 
-          const username = document.getElementById("username").value;
-          const password = document.getElementById("password").value;
+      function showMessage(message, isError = true) {
+        messageEl.textContent = message;
+        messageEl.className = `message ${isError ? "error" : "success"}`;
+      }
 
-          fetch("https://example.com/api/login", {
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        try {
+          const response = await fetch("/api/login", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
             body: JSON.stringify({ username, password }),
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              if (data.success) {
-                alert("Успішний вхід!");
-                window.location.href = "dashboard.html";
-              } else {
-                document.getElementById("message").textContent =
-                  "Невірний логін або пароль";
-              }
-            })
-            .catch((error) => {
-              console.error("Помилка: ", error);
-            });
-        });
+          });
+
+          // Check if response is ok (status in 200-299 range)
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({
+              message: "Помилка сервера",
+            }));
+            throw new Error(errorData.message || "Помилка сервера");
+          }
+
+          const data = await response.json();
+
+          if (data.success) {
+            showMessage("Успішний вхід!", false);
+            setTimeout(() => {
+              window.location.href = "/menu";
+            }, 1000);
+          } else {
+            showMessage(data.message || "Невірний логін або пароль");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          showMessage(error.message || "Помилка з'єднання з сервером");
+        }
+      });
     </script>
   </body>
 </html>
