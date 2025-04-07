@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import hashlib
+from typing import Optional
 
-from app.database import get_db
-from app.models import User
+from app.database import execute_query, get_db_cursor
 
 router = APIRouter()
 
@@ -20,27 +19,31 @@ class UserRegister(BaseModel):
 class UserResponse(BaseModel):
     success: bool
     message: str
-    user: dict | None = None
+    user: Optional[dict] = None
 
 @router.post("/api/login", response_model=UserResponse)
-async def login(user: UserLogin, db: Session = Depends(get_db)):
+async def login(user: UserLogin):
     try:
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
         
-        db_user = db.query(User).filter(
-            User.login == user.username,
-            User.password == hashed_password
-        ).first()
+        query = """
+        SELECT id, login, email, role 
+        FROM users 
+        WHERE login = %s AND password = %s
+        """
         
-        if db_user:
+        result = execute_query(query, (user.username, hashed_password))
+        
+        if result and len(result) > 0:
+            db_user = result[0]
             return {
                 "success": True,
                 "message": "Login successful",
                 "user": {
-                    "id": db_user.id,
-                    "username": db_user.login,
-                    "email": db_user.email,
-                    "role": db_user.role
+                    "id": db_user['id'],
+                    "username": db_user['login'],
+                    "email": db_user['email'],
+                    "role": db_user['role']
                 }
             }
         return {"success": False, "message": "Invalid username or password", "user": None}
@@ -49,13 +52,16 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/api/register", response_model=UserResponse)
-async def register(user: UserRegister, db: Session = Depends(get_db)):
+async def register(user: UserRegister):
     try:
-        existing_user = db.query(User).filter(
-            (User.login == user.username) | (User.email == user.email)
-        ).first()
+        # Check if username or email already exists
+        check_query = """
+        SELECT id FROM users
+        WHERE login = %s OR email = %s
+        """
+        existing_user = execute_query(check_query, (user.username, user.email))
         
-        if existing_user:
+        if existing_user and len(existing_user) > 0:
             return {
                 "success": False,
                 "message": "Username or email already exists",
@@ -64,28 +70,27 @@ async def register(user: UserRegister, db: Session = Depends(get_db)):
         
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
         
-        db_user = User(
-            login=user.username,
-            email=user.email,
-            password=hashed_password,
-            role='customer'
-        )
+        # Insert new user
+        insert_query = """
+        INSERT INTO users (login, email, password, role)
+        VALUES (%s, %s, %s, %s)
+        RETURNING id, login, email, role
+        """
         
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(insert_query, (user.username, user.email, hashed_password, 'customer'))
+            db_user = cursor.fetchone()
         
         return {
             "success": True,
             "message": "Registration successful",
             "user": {
-                "id": db_user.id,
-                "username": db_user.login,
-                "email": db_user.email,
-                "role": db_user.role
+                "id": db_user['id'],
+                "username": db_user['login'],
+                "email": db_user['email'],
+                "role": db_user['role']
             }
         }
         
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

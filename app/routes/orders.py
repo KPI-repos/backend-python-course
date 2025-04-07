@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
 
-from app.database import get_db
-from app.models import Order, User, Dish
+from app.database import execute_query, get_db_cursor
 
 router = APIRouter()
 
@@ -13,36 +11,50 @@ class OrderCreate(BaseModel):
     dishId: int
 
 @router.post("/api/orders")
-async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
+async def create_order(order: OrderCreate):
     try:
-        user = db.query(User).filter(
-            User.id == order.userId,
-            User.role == 'customer'
-        ).first()
-        if not user:
+        user_query = """
+        SELECT id FROM users 
+        WHERE id = %s AND role = 'customer'
+        """
+        user = execute_query(user_query, (order.userId,))
+        
+        if not user or len(user) == 0:
             raise HTTPException(status_code=404, detail="User not found or not authorized")
 
-        dish = db.query(Dish).filter(Dish.id == order.dishId).first()
-        if not dish:
+        dish_query = "SELECT id FROM dishes WHERE id = %s"
+        dish = execute_query(dish_query, (order.dishId,))
+        
+        if not dish or len(dish) == 0:
             raise HTTPException(status_code=404, detail="Dish not found")
 
-        db_order = Order(
-            user_id=order.userId,
-            dish_id=order.dishId,
-            status='pending',
-            created_at=datetime.now()
-        )
+        order_query = """
+        INSERT INTO orders (user_id, status, created_at)
+        VALUES (%s, %s, %s)
+        RETURNING id
+        """
         
-        db.add(db_order)
-        db.commit()
-        db.refresh(db_order)
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(
+                order_query, 
+                (order.userId, 'pending', datetime.now())
+            )
+            new_order = cursor.fetchone()
+            
+            order_item_query = """
+            INSERT INTO order_items (order_id, dish_id, quantity, price)
+            SELECT %s, %s, 1, price FROM dishes WHERE id = %s
+            """
+            cursor.execute(
+                order_item_query,
+                (new_order['id'], order.dishId, order.dishId)
+            )
         
         return {
             "success": True,
             "message": "Order created successfully",
-            "id": db_order.id
+            "id": new_order['id']
         }
         
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

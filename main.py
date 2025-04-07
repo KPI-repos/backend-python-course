@@ -8,10 +8,9 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent))
 
-from app.database import engine
-from app import init_test_data
-from app.models.tables import Base
 from app.routes import auth_router, dishes_router, orders_router, pages_router
+
+from app.database import get_db_connection
 
 app = FastAPI(
     title="Restaurant API",
@@ -28,9 +27,14 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="public/static"), name="static")
-Base.metadata.create_all(bind=engine)
 
-init_test_data()
+try:
+    with get_db_connection() as conn:
+        print("Successfully connected to PostgreSQL database")
+except Exception as e:
+    print(f"Error connecting to PostgreSQL database: {e}")
+    print("Please run create_database.py first to set up the database")
+    sys.exit(1)
 
 app.include_router(
     auth_router,
@@ -63,6 +67,7 @@ async def read_root():
         "version": "1.0.0",
         "status": "running"
     }
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {

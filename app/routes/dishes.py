@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List
 
-from app.database import get_db
-from app.models import Dish, Order
+from app.database import execute_query, get_db_cursor
 
 router = APIRouter()
 
@@ -23,87 +21,101 @@ class DishResponse(DishBase):
         orm_mode = True
 
 @router.post("/api/dishes", response_model=dict)
-async def create_dish(dish: DishCreate, db: Session = Depends(get_db)):
+async def create_dish(dish: DishCreate):
     try:
-        db_dish = Dish(**dish.dict())
-        db.add(db_dish)
-        db.commit()
-        db.refresh(db_dish)
+        query = """
+        INSERT INTO dishes (title, description, price)
+        VALUES (%s, %s, %s)
+        RETURNING id
+        """
+        with get_db_cursor(commit=True) as cursor:
+            cursor.execute(query, (dish.title, dish.description, dish.price))
+            result = cursor.fetchone()
         
         return {
             "success": True,
             "message": "Dish created successfully",
-            "id": db_dish.id
+            "id": result['id']
         }
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/api/dishes/{dish_id}", response_model=DishResponse)
-async def get_dish(dish_id: int, db: Session = Depends(get_db)):
-    dish = db.query(Dish).filter(Dish.id == dish_id).first()
-    if not dish:
+async def get_dish(dish_id: int):
+    query = "SELECT id, title, description, price FROM dishes WHERE id = %s"
+    result = execute_query(query, (dish_id,))
+    
+    if not result or len(result) == 0:
         raise HTTPException(status_code=404, detail="Dish not found")
-    return dish
+    
+    return result[0]
 
 @router.get("/api/dishes", response_model=dict)
-async def get_dishes(db: Session = Depends(get_db)):
-    dishes = db.query(Dish).all()
+async def get_dishes():
+    query = "SELECT id, title, description, price FROM dishes"
+    dishes = execute_query(query)
+    
     return {
         "success": True,
-        "dishes": [
-            {
-                "id": dish.id,
-                "title": dish.title,
-                "description": dish.description,
-                "price": dish.price
-            }
-            for dish in dishes
-        ]
+        "dishes": dishes
     }
 
 @router.delete("/api/dishes/{dish_id}")
-async def delete_dish(dish_id: int, db: Session = Depends(get_db)):
+async def delete_dish(dish_id: int):
     try:
-        dish = db.query(Dish).filter(Dish.id == dish_id).first()
-        if not dish:
+        # Check if dish exists
+        check_query = "SELECT id FROM dishes WHERE id = %s"
+        dish = execute_query(check_query, (dish_id,))
+        
+        if not dish or len(dish) == 0:
             raise HTTPException(status_code=404, detail="Dish not found")
-            
-        order_count = db.query(Order).filter(Order.dish_id == dish_id).count()
+        
+        # Check if dish has orders
+        order_query = "SELECT COUNT(*) FROM order_items WHERE dish_id = %s"
+        with get_db_cursor() as cursor:
+            cursor.execute(order_query, (dish_id,))
+            order_count = cursor.fetchone()['count']
+        
         if order_count > 0:
             return {
                 "success": False,
                 "message": "Cannot delete dish because it has existing orders"
             }
         
-        db.delete(dish)
-        db.commit()
+        # Delete dish
+        delete_query = "DELETE FROM dishes WHERE id = %s"
+        execute_query(delete_query, (dish_id,), commit=True)
         
         return {
             "success": True,
             "message": "Dish deleted successfully"
         }
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.put("/api/dishes/{dish_id}")
-async def update_dish(dish_id: int, dish_update: DishCreate, db: Session = Depends(get_db)):
+async def update_dish(dish_id: int, dish_update: DishCreate):
     try:
-        dish = db.query(Dish).filter(Dish.id == dish_id).first()
-        if not dish:
+        check_query = "SELECT id FROM dishes WHERE id = %s"
+        dish = execute_query(check_query, (dish_id,))
+        
+        if not dish or len(dish) == 0:
             raise HTTPException(status_code=404, detail="Dish not found")
         
-        for key, value in dish_update.dict().items():
-            setattr(dish, key, value)
-            
-        db.commit()
-        db.refresh(dish)
+        update_query = """
+        UPDATE dishes 
+        SET title = %s, description = %s, price = %s
+        WHERE id = %s
+        """
+        execute_query(
+            update_query, 
+            (dish_update.title, dish_update.description, dish_update.price, dish_id),
+            commit=True
+        )
         
         return {
             "success": True,
             "message": "Dish updated successfully"
         }
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

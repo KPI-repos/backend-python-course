@@ -1,42 +1,26 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Optional
 
-from app.database import Base
+class User:
+    def __init__(self, id=None, login="", email="", password="", role="customer"):
+        self.id = id
+        self.login = login
+        self.email = email
+        self.password = password
+        self.role = role
 
-class User(Base):
-    __tablename__ = "users"
+class Dish:
+    def __init__(self, id=None, title="", description="", price=0.0):
+        self.id = id
+        self.title = title
+        self.description = description
+        self.price = price
 
-    id = Column(Integer, primary_key=True, index=True)
-    login = Column(String, unique=True, nullable=False)
-    email = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
-    role = Column(String, nullable=False)
-    
-    orders = relationship("Order", back_populates="user")
-    
-    __table_args__ = (
-        CheckConstraint(role.in_(['admin', 'customer']), name='valid_role'),
-    )
-
-class Dish(Base):
-    __tablename__ = "dishes"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, nullable=False)
-    description = Column(String)
-    price = Column(Float, nullable=False)
-    
-    orders = relationship("Order", back_populates="dish")
-
-class Order(Base):
-    __tablename__ = "orders"
-
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    dish_id = Column(Integer, ForeignKey("dishes.id"), nullable=False)
-    status = Column(String, default="pending")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    
-    user = relationship("User", back_populates="orders")
-    dish = relationship("Dish", back_populates="orders")
+class Order:
+    def __init__(self, id=None, user_id=None, dish_id=None, status="pending", created_at=None):
+        self.id = id
+        self.user_id = user_id
+        self.dish_id = dish_id
+        self.status = status
+        self.created_at = created_at if created_at else datetime.now()
