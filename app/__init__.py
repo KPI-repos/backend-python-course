@@ -1,32 +1,35 @@
 import hashlib
-from app.database import SessionLocal
-from app.models import User, Dish
+from app.database import get_database, get_mongo_client
+from bson.objectid import ObjectId
 
 def init_test_data():
-    """Initialize test users and sample dishes in the database"""
-    db = SessionLocal()
+    """Initialize test users and sample dishes in the MongoDB database"""
+    client = get_mongo_client()
+    db = get_database(client)
+    
     try:
-        admin = db.query(User).filter(User.login == 'admin').first()
+        users_collection = db['users']
+        dishes_collection = db['dishes']
+        
+        admin = users_collection.find_one({'login': 'admin'})
         if not admin:
             admin_password = hashlib.sha256('admin'.encode()).hexdigest()
-            admin = User(
-                login='admin',
-                email='admin@example.com',
-                password=admin_password,
-                role='admin'
-            )
-            db.add(admin)
+            users_collection.insert_one({
+                'login': 'admin',
+                'email': 'admin@example.com',
+                'password': admin_password,
+                'role': 'admin'
+            })
 
-        customer = db.query(User).filter(User.login == 'customer').first()
+        customer = users_collection.find_one({'login': 'customer'})
         if not customer:
             customer_password = hashlib.sha256('customer'.encode()).hexdigest()
-            customer = User(
-                login='customer',
-                email='customer@example.com',
-                password=customer_password,
-                role='customer'
-            )
-            db.add(customer)
+            users_collection.insert_one({
+                'login': 'customer',
+                'email': 'customer@example.com',
+                'password': customer_password,
+                'role': 'customer'
+            })
 
         sample_dishes = [
             {
@@ -47,16 +50,13 @@ def init_test_data():
         ]
 
         for dish_data in sample_dishes:
-            existing_dish = db.query(Dish).filter(Dish.title == dish_data["title"]).first()
+            existing_dish = dishes_collection.find_one({'title': dish_data["title"]})
             if not existing_dish:
-                dish = Dish(**dish_data)
-                db.add(dish)
+                dishes_collection.insert_one(dish_data)
 
-        db.commit()
         print("Test data initialized successfully")
         
     except Exception as e:
-        db.rollback()
         print(f"Error initializing test data: {e}")
     finally:
-        db.close()
+        client.close()

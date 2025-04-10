@@ -363,14 +363,14 @@
           if (isAdmin) {
             buttonsHtml = `
                       <div class="btn-container">
-                          <button class="btn edit-btn" onclick="openEditModal(${item.id})">Редагувати</button>
-                          <button class="btn delete-btn" onclick="deleteItem(${item.id})">Видалити</button>
+                          <button class="btn edit-btn" onclick="openEditModal('${item.id}')">Редагувати</button>
+                          <button class="btn delete-btn" onclick="deleteItem('${item.id}')">Видалити</button>
                       </div>
                   `;
           } else if (isCustomer) {
             buttonsHtml = `
                       <div class="btn-container">
-                          <button class="btn order-btn" onclick="orderItem(${item.id})">Замовити</button>
+                          <button class="btn order-btn" onclick="orderItem('${item.id}')">Замовити</button>
                       </div>
                   `;
           }
@@ -573,6 +573,6 @@
           closeCreateModal();
         }
       };
-    </script>
+</script>
   </body>
 </html>

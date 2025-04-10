@@ -1,48 +1,48 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from bson.objectid import ObjectId
 from pydantic import BaseModel
 from datetime import datetime
 
 from app.database import get_db
-from app.models import Order, User, Dish
 
 router = APIRouter()
 
 class OrderCreate(BaseModel):
-    userId: int
-    dishId: int
+    userId: str
+    dishId: str
 
 @router.post("/api/orders")
-async def create_order(order: OrderCreate, db: Session = Depends(get_db)):
+async def create_order(order: OrderCreate, db=Depends(get_db)):
     try:
-        user = db.query(User).filter(
-            User.id == order.userId,
-            User.role == 'customer'
-        ).first()
+        # Verify user exists and is a customer
+        user = db['users'].find_one({
+            '_id': ObjectId(order.userId),
+            'role': 'customer'
+        })
         if not user:
             raise HTTPException(status_code=404, detail="User not found or not authorized")
 
-        dish = db.query(Dish).filter(Dish.id == order.dishId).first()
+        # Verify dish exists
+        dish = db['dishes'].find_one({'_id': ObjectId(order.dishId)})
         if not dish:
             raise HTTPException(status_code=404, detail="Dish not found")
 
-        db_order = Order(
-            user_id=order.userId,
-            dish_id=order.dishId,
-            status='pending',
-            created_at=datetime.now()
-        )
+        # Prepare order document
+        order_doc = {
+            'user_id': order.userId,
+            'dish_id': order.dishId,
+            'status': 'pending',
+            'created_at': datetime.now()
+        }
         
-        db.add(db_order)
-        db.commit()
-        db.refresh(db_order)
+        # Insert order into MongoDB
+        result = db['orders'].insert_one(order_doc)
         
         return {
             "success": True,
             "message": "Order created successfully",
-            "id": db_order.id
+            "id": str(result.inserted_id)
         }
         
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

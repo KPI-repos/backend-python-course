@@ -1,19 +1,38 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+import certifi
+from typing import Optional
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///shop.db"
+MONGO_URI = "mongodb+srv://new-user1:new-user1@cluster0.obkkncb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+DATABASE_NAME = "restaurant"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def get_mongo_client() -> MongoClient:
 
-Base = declarative_base()
+    try:
+        client = MongoClient(
+            MONGO_URI, 
+            tlsCAFile=certifi.where(), 
+            server_api=ServerApi('1')
+        )
+        # Verify connection
+        client.admin.command('ping')
+        return client
+    except Exception as e:
+        raise ConnectionError(f"Failed to connect to MongoDB: {e}")
+
+def get_database(client: Optional[MongoClient] = None) -> object:
+   
+    if client is None:
+        client = get_mongo_client()
+    return client[DATABASE_NAME]
 
 def get_db():
-    db = SessionLocal()
+  
+    client = None
     try:
+        client = get_mongo_client()
+        db = get_database(client)
         yield db
     finally:
-        db.close()
+        if client:
+            client.close()

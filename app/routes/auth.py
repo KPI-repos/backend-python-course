@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from bson.objectid import ObjectId
 from pydantic import BaseModel
 import hashlib
 
@@ -23,24 +23,25 @@ class UserResponse(BaseModel):
     user: dict | None = None
 
 @router.post("/api/login", response_model=UserResponse)
-async def login(user: UserLogin, db: Session = Depends(get_db)):
+async def login(user: UserLogin, db=Depends(get_db)):
     try:
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
         
-        db_user = db.query(User).filter(
-            User.login == user.username,
-            User.password == hashed_password
-        ).first()
+        # Query for user in MongoDB
+        db_user = db['users'].find_one({
+            'login': user.username,
+            'password': hashed_password
+        })
         
         if db_user:
             return {
                 "success": True,
                 "message": "Login successful",
                 "user": {
-                    "id": db_user.id,
-                    "username": db_user.login,
-                    "email": db_user.email,
-                    "role": db_user.role
+                    "id": str(db_user['_id']),
+                    "username": db_user['login'],
+                    "email": db_user['email'],
+                    "role": db_user['role']
                 }
             }
         return {"success": False, "message": "Invalid username or password", "user": None}
@@ -49,11 +50,15 @@ async def login(user: UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/api/register", response_model=UserResponse)
-async def register(user: UserRegister, db: Session = Depends(get_db)):
+async def register(user: UserRegister, db=Depends(get_db)):
     try:
-        existing_user = db.query(User).filter(
-            (User.login == user.username) | (User.email == user.email)
-        ).first()
+        # Check for existing user
+        existing_user = db['users'].find_one({
+            '$or': [
+                {'login': user.username},
+                {'email': user.email}
+            ]
+        })
         
         if existing_user:
             return {
@@ -64,28 +69,27 @@ async def register(user: UserRegister, db: Session = Depends(get_db)):
         
         hashed_password = hashlib.sha256(user.password.encode()).hexdigest()
         
-        db_user = User(
-            login=user.username,
-            email=user.email,
-            password=hashed_password,
-            role='customer'
-        )
+        # Prepare user document
+        user_doc = {
+            'login': user.username,
+            'email': user.email,
+            'password': hashed_password,
+            'role': 'customer'
+        }
         
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
+        # Insert user into MongoDB
+        result = db['users'].insert_one(user_doc)
         
         return {
             "success": True,
             "message": "Registration successful",
             "user": {
-                "id": db_user.id,
-                "username": db_user.login,
-                "email": db_user.email,
-                "role": db_user.role
+                "id": str(result.inserted_id),
+                "username": user_doc['login'],
+                "email": user_doc['email'],
+                "role": user_doc['role']
             }
         }
         
     except Exception as e:
-        db.rollback()
         raise HTTPException(status_code=500, detail=str(e))

@@ -8,9 +8,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent))
 
-from app.database import engine
+from app.database import get_mongo_client, get_database
 from app import init_test_data
-from app.models.tables import Base
 from app.routes import auth_router, dishes_router, orders_router, pages_router
 
 app = FastAPI(
@@ -28,7 +27,14 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory="public/static"), name="static")
-Base.metadata.create_all(bind=engine)
+
+client = get_mongo_client()
+db = get_database(client)
+
+collections = ['users', 'dishes', 'orders']
+for collection in collections:
+    if collection not in db.list_collection_names():
+        db.create_collection(collection)
 
 init_test_data()
 
@@ -63,12 +69,21 @@ async def read_root():
         "version": "1.0.0",
         "status": "running"
     }
+
 @app.get("/health", tags=["Health"])
 async def health_check():
     return {
         "status": "healthy",
         "timestamp": datetime.now().isoformat()
     }
+
+@app.on_event("shutdown")
+def shutdown_event():
+    """
+    Ensure MongoDB client is closed when the application shuts down
+    """
+    if 'client' in globals():
+        client.close()
 
 if __name__ == "__main__":
     uvicorn.run(
