@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Dishes</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            border-bottom: 3px solid #4a4a4a;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .dish-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        .dish-item:hover {
+            transform: scale(1.02);
+        }
+        .dish-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .dish-price {
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .dish-description {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Our Delicious Dishes</h1>
+    {% for dish in dishes %}
+        <div class="dish-item">
+            <div class="dish-name">{{ dish.name }}</div>
+            <span class="dish-price">${{ dish.price }}</span>
+            <span class="dish-description">{{ dish.description }}</span>
+        </div>
+    {% endfor %}
+    <a href="/" class="back-link">← Back to Home</a>
+</body>
+</html>

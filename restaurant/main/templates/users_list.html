@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Users</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .user-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .user-item {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        .user-item:hover {
+            transform: scale(1.02);
+        }
+        .user-name {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .user-email {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #2980b9;
+        }
+        @media (min-width: 600px) {
+            .user-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .user-name {
+                margin-bottom: 0;
+                margin-right: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Users</h1>
+    
+    <div class="user-list">
+        {% for user in users %}
+            <div class="user-item">
+                <div class="user-name">{{ user.name }}</div>
+                <div class="user-email">{{ user.email }}</div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <a href="/" class="back-link">← Back to Home</a>
+</body>
+</html>

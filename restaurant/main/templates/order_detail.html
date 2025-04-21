@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+            line-height: 1.6;
+            color: #333;
+        }
+        .error-message {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .order-section {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .order-detail {
+            margin-bottom: 15px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #3498db;
+            margin-right: 10px;
+        }
+        .order-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            display: inline-block;
+        }
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+        .status-cancelled {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .detail-link {
+            text-decoration: none;
+            color: #3498db;
+            transition: color 0.3s ease;
+        }
+        .detail-link:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #2980b9;
+        }
+        @media (max-width: 600px) {
+            .order-section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% if error %}
+        <div class="error-message">
+            {{ error }}
+        </div>
+    {% else %}
+        <h1>Order Details</h1>
+        
+        <div class="order-section">
+            <div class="order-detail">
+                <span class="detail-label">Order ID:</span>
+                {{ order.id }}
+            </div>
+            <div class="order-detail">
+                <span class="detail-label">Status:</span>
+                <span class="order-status status-{{ order.status | lower }}">
+                    {{ order.status }}
+                </span>
+            </div>
+        </div>
+
+        <div class="order-section">
+            <h2>User Details</h2>
+            <div class="order-detail">
+                <a href="{% url 'user_detail' user.id %}" class="detail-link">
+                    <span class="detail-label">User:</span>
+                    {{ user.name }} ({{ user.email }})
+                </a>
+            </div>
+        </div>
+
+        <div class="order-section">
+            <h2>Dish Details</h2>
+            <div class="order-detail">
+                <a href="{% url 'dish_detail' dish.id %}" class="detail-link">
+                    <span class="detail-label">Dish:</span>
+                    {{ dish.name }} - ${{ dish.price }}
+                </a>
+            </div>
+        </div>
+    {% endif %}
+    
+    <a href="/orders/" class="back-link">← Back to Orders</a>
+</body>
+</html>
