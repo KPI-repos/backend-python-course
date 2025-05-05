@@ -1,90 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Restaurant Users</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f4f4f4;
-            line-height: 1.6;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        .user-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+      body {
+        font-family: "Arial", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f4f4f4;
+        line-height: 1.6;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+      }
+      .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+      .action-button {
+        text-decoration: none;
+        padding: 10px 15px;
+        background-color: #3498db;
+        color: white;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+      }
+      .action-button:hover {
+        background-color: #2980b9;
+      }
+      .user-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .user-item {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: transform 0.3s ease;
+      }
+      .user-item:hover {
+        transform: scale(1.02);
+      }
+      .user-info {
+        display: flex;
+        flex-direction: column;
+      }
+      .user-name {
+        font-weight: bold;
+        color: #3498db;
+        font-size: 1.1em;
+        margin-bottom: 5px;
+      }
+      .user-email {
+        color: #7f8c8d;
+        font-size: 0.9em;
+      }
+      .user-actions {
+        display: flex;
+        gap: 10px;
+      }
+      .view-link {
+        text-decoration: none;
+        color: #3498db;
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .view-link:hover {
+        background-color: #3498db;
+        color: white;
+      }
+      .edit-link {
+        text-decoration: none;
+        color: #f39c12;
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .edit-link:hover {
+        background-color: #f39c12;
+        color: white;
+      }
+      .delete-link {
+        text-decoration: none;
+        color: #e74c3c;
+        background-color: #f0f0f0;
+        padding: 5px 10px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      .delete-link:hover {
+        background-color: #e74c3c;
+        color: white;
+      }
+      .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        text-decoration: none;
+        color: #3498db;
+        font-weight: bold;
+        transition: color 0.3s ease;
+      }
+      .back-link:hover {
+        color: #2980b9;
+      }
+      @media (max-width: 600px) {
         .user-item {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
         }
-        .user-item:hover {
-            transform: scale(1.02);
+        .user-actions {
+          width: 100%;
+          justify-content: space-between;
         }
-        .user-name {
-            font-weight: bold;
-            color: #3498db;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        .user-email {
-            color: #7f8c8d;
-            font-size: 0.9em;
-        }
-        .back-link {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #3498db;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-        .back-link:hover {
-            color: #2980b9;
-        }
-        @media (min-width: 600px) {
-            .user-item {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .user-name {
-                margin-bottom: 0;
-                margin-right: 15px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
-    <h1>Users</h1>
-    
+  </head>
+  <body>
+    <div class="header-actions">
+      <h1>Users</h1>
+      <a href="{% url 'user_create' %}" class="action-button">+ Add User</a>
+    </div>
+
     <div class="user-list">
-        {% for user in users %}
-            <div class="user-item">
-                <div class="user-name">{{ user.name }}</div>
-                <div class="user-email">{{ user.email }}</div>
-            </div>
-        {% endfor %}
+      {% for user in users %}
+      <div class="user-item">
+        <div class="user-info">
+          <div class="user-name">{{ user.name }}</div>
+          <div class="user-email">{{ user.email }}</div>
+        </div>
+        <div class="user-actions">
+          <a href="{% url 'user_detail' user.id %}" class="view-link">View</a>
+          <a href="{% url 'user_update' user.id %}" class="edit-link">Edit</a>
+          <a href="{% url 'user_delete' user.id %}" class="delete-link"
+            >Delete</a
+          >
+        </div>
+      </div>
+      {% endfor %}
     </div>
 
     <a href="/" class="back-link">← Back to Home</a>
-</body>
+  </body>
 </html>

@@ -1,83 +1,134 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import User, Dish, Order
+from .forms import UserForm, DishForm, OrderForm
 
-# Sample fixed data (keep existing data)
-USERS = [
-    {'id': 1, 'name': 'John Doe', 'email': 'john@example.com'},
-    {'id': 2, 'name': 'Jane Smith', 'email': 'jane@example.com'}
-]
-
-DISHES = [
-    {'id': 1, 'name': 'Pizza', 'price': 10.99, 'description': 'Cheese pizza'},
-    {'id': 2, 'name': 'Burger', 'price': 8.50, 'description': 'Classic burger'}
-]
-
-ORDERS = [
-    {'id': 1, 'user_id': 1, 'dish_id': 1, 'status': 'pending'},
-    {'id': 2, 'user_id': 2, 'dish_id': 2, 'status': 'completed'}
-]
 
 def home(request):
     return render(request, 'home.html', {
-        'users_count': len(USERS),
-        'dishes_count': len(DISHES),
-        'orders_count': len(ORDERS)
+        'users_count': User.objects.count(),
+        'dishes_count': Dish.objects.count(),
+        'orders_count': Order.objects.count()
     })
 
 def users_list(request):
-    return render(request, 'users_list.html', {'users': USERS})
+    users = User.objects.all()
+    return render(request, 'users_list.html', {'users': users})
 
 def dishes_list(request):
-    return render(request, 'dishes_list.html', {'dishes': DISHES})
+    dishes = Dish.objects.all()
+    return render(request, 'dishes_list.html', {'dishes': dishes})
 
 def orders_list(request):
-    return render(request, 'orders_list.html', {'orders': ORDERS})
+    orders = Order.objects.all()
+    return render(request, 'orders_list.html', {'orders': orders})
 
 def order_detail(request, order_id):
-    # Find the specific order
-    order = next((order for order in ORDERS if order['id'] == order_id), None)
-    
-    if order:
-        # Find associated user and dish
-        user = next((user for user in USERS if user['id'] == order['user_id']), None)
-        dish = next((dish for dish in DISHES if dish['id'] == order['dish_id']), None)
-        
-        return render(request, 'order_detail.html', {
-            'order': order,
-            'user': user,
-            'dish': dish
-        })
-    
-    # Handle case where order is not found
-    return render(request, 'order_detail.html', {'error': 'Order not found'})
+    order = get_object_or_404(Order, id=order_id)
+    return render(request, 'order_detail.html', {
+        'order': order,
+        'user': order.user,
+        'dish': order.dish
+    })
 
 def user_detail(request, user_id):
-    # Find the specific user
-    user = next((user for user in USERS if user['id'] == user_id), None)
-    
-    if user:
-        # Find orders for this user
-        user_orders = [order for order in ORDERS if order['user_id'] == user_id]
-        
-        return render(request, 'user_detail.html', {
-            'user': user,
-            'orders': user_orders
-        })
-    
-    # Handle case where user is not found
-    return render(request, 'user_detail.html', {'error': 'User not found'})
+    user = get_object_or_404(User, id=user_id)
+    user_orders = user.orders.all()
+    return render(request, 'user_detail.html', {
+        'user': user,
+        'orders': user_orders
+    })
 
 def dish_detail(request, dish_id):
-    # Find the specific dish
-    dish = next((dish for dish in DISHES if dish['id'] == dish_id), None)
-    
-    if dish:
-        # Find orders for this dish
-        dish_orders = [order for order in ORDERS if order['dish_id'] == dish_id]
-        
-        return render(request, 'dish_detail.html', {
-            'dish': dish,
-            'orders': dish_orders
-        })
-    
-    # Handle case where dish is not found
-    return render(request, 'dish_detail.html', {'error': 'Dish not found'})
+    dish = get_object_or_404(Dish, id=dish_id)
+    dish_orders = dish.orders.all()
+    return render(request, 'dish_detail.html', {
+        'dish': dish,
+        'orders': dish_orders
+    })
+
+# User CRUD operations
+def user_create(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('users_list')
+    else:
+        form = UserForm()
+    return render(request, 'user_form.html', {'form': form})
+
+def user_update(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user_detail', user_id=user.id)
+    else:
+        form = UserForm(instance=user)
+    return render(request, 'user_form.html', {'form': form, 'user': user})
+
+def user_delete(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        user.delete()
+        return redirect('users_list')
+    return render(request, 'user_confirm_delete.html', {'user': user})
+
+# Dish CRUD operations
+def dish_create(request):
+    if request.method == 'POST':
+        form = DishForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('dishes_list')
+    else:
+        form = DishForm()
+    return render(request, 'dish_form.html', {'form': form})
+
+def dish_update(request, dish_id):
+    dish = get_object_or_404(Dish, id=dish_id)
+    if request.method == 'POST':
+        form = DishForm(request.POST, instance=dish)
+        if form.is_valid():
+            form.save()
+            return redirect('dish_detail', dish_id=dish.id)
+    else:
+        form = DishForm(instance=dish)
+    return render(request, 'dish_form.html', {'form': form, 'dish': dish})
+
+def dish_delete(request, dish_id):
+    dish = get_object_or_404(Dish, id=dish_id)
+    if request.method == 'POST':
+        dish.delete()
+        return redirect('dishes_list')
+    return render(request, 'dish_confirm_delete.html', {'dish': dish})
+
+# Order CRUD operations
+def order_create(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('orders_list')
+    else:
+        form = OrderForm()
+    return render(request, 'order_form.html', {'form': form})
+
+def order_update(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('order_detail', order_id=order.id)
+    else:
+        form = OrderForm(instance=order)
+    return render(request, 'order_form.html', {'form': form, 'order': order})
+
+def order_delete(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    if request.method == 'POST':
+        order.delete()
+        return redirect('orders_list')
+    return render(request, 'order_confirm_delete.html', {'order': order})
