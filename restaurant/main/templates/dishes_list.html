@@ -137,7 +137,9 @@
   <body>
     <div class="header-actions">
       <h1>Our Delicious Dishes</h1>
+      {% if is_admin %}
       <a href="{% url 'dish_create' %}" class="action-button">+ Add Dish</a>
+      {% endif %}
     </div>
 
     {% for dish in dishes %}
@@ -149,8 +151,10 @@
       </div>
       <div class="dish-actions">
         <a href="{% url 'dish_detail' dish.id %}" class="view-link">View</a>
+        {% if is_admin %}
         <a href="{% url 'dish_update' dish.id %}" class="edit-link">Edit</a>
         <a href="{% url 'dish_delete' dish.id %}" class="delete-link">Delete</a>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

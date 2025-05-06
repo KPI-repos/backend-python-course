@@ -66,9 +66,75 @@
       .nav-link:hover {
         background-color: #2980b9;
       }
+
+      .user-menu {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .user-info {
+        background-color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .auth-link {
+        text-decoration: none;
+        background-color: #3498db;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+      }
+
+      .auth-link:hover {
+        background-color: #2980b9;
+      }
+
+      .user-menu {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .user-info {
+        background-color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .auth-link {
+        text-decoration: none;
+        background-color: #3498db;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+      }
+
+      .auth-link:hover {
+        background-color: #2980b9;
+      }
     </style>
   </head>
   <body>
+    <div class="user-menu">
+      {% if current_user %}
+      <div class="user-info">Logged in as: {{ current_user.name }}</div>
+      <a href="{% url 'logout' %}" class="auth-link">Logout</a>
+      {% else %}
+      <a href="{% url 'login' %}" class="auth-link">Login</a>
+      <a href="{% url 'register' %}" class="auth-link">Register</a>
+      {% endif %}
+    </div>
+
     <h1>Restaurant Management System</h1>
 
     <div class="dashboard-stats">
@@ -87,9 +153,13 @@
     </div>
 
     <div class="navigation">
-      <a href="/users/" class="nav-link">Users List</a>
-      <a href="/dishes/" class="nav-link">Dishes List</a>
-      <a href="/orders/" class="nav-link">Orders List</a>
+      {% if is_admin %}
+      <a href="{% url 'users_list' %}" class="nav-link">Users List</a>
+      {% endif %}
+      <a href="{% url 'dishes_list' %}" class="nav-link">Dishes List</a>
+      {% if current_user %}
+      <a href="{% url 'orders_list' %}" class="nav-link">Orders List</a>
+      {% endif %}
     </div>
   </body>
 </html>
